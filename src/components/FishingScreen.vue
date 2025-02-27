@@ -37,7 +37,7 @@
       <p v-if="isCaught">Поздравляем, рыба поймана!</p>
     </div>
 
-    <!-- Инвентарь -->
+    <!-- Инвентарь (если нужно отобразить его прямо в экране) -->
     <div v-if="!isFishing && inventory.length > 0">
       <h3>Ваш инвентарь</h3>
       <ul>
@@ -78,7 +78,7 @@ export default {
       };
     },
     totalCatchChance() {
-      return (this.selectedRod ? this.selectedRod.catchChance : 0) + 
+      return (this.selectedRod ? this.selectedRod.catchChance : 0) +
              (this.selectedBait ? this.selectedBait.catchBonus : 0);
     }
   },
@@ -88,35 +88,29 @@ export default {
         alert("Выберите снасти!");
         return;
       }
-
       this.isFishing = true;
       this.isCaught = false;
       this.isRodDefault = false;
       this.isThrowing = true;
-
-      // 1. Анимация заброса удочки
+      // Анимация заброса удочки
       setTimeout(() => {
         this.isThrowing = false;
         this.isCasting = true;
-
-        // 2. Полет наживки
+        // Полет наживки
         this.isBaitFlying = true;
         setTimeout(() => {
           this.isBaitFlying = false;
           this.isCasting = false;
-
-          // 3. Начало ожидания поклевки
+          // Ожидание поклевки
           this.startBitePhase();
         }, 800);
       }, 500);
     },
     startBitePhase() {
       const biteDelay = Math.floor(Math.random() * (7000 - 3000) + 3000);
-
       setTimeout(() => {
         this.isBaitBiting = true;
         this.biteTimer = 2;
-
         // Таймер поклевки
         this.fishingTimer = setInterval(() => {
           if (this.biteTimer > 0) {
@@ -132,32 +126,30 @@ export default {
     },
     hookFish() {
       if (!this.isBaitBiting) return;
-
       clearInterval(this.fishingTimer);
       this.isBaitBiting = false;
-
       const randomChance = Math.random();
       if (randomChance < this.totalCatchChance) {
         this.isCaught = true;
-        alert("Вы поймали рыбу!");
-
-        // Эмитируем событие с обновленным инвентарем
         this.addFishToInventory();
       } else {
         alert("Рыба ускользнула!");
       }
       this.isFishing = false;
-      this.isRodReturned = true;  // Удочка возвращается в вертикальное положение после подсекания
+      this.isRodReturned = true;
     },
     addFishToInventory() {
-      // Пойманная рыба зависит от выбранной удочки
-      const fish = {
-        name: this.selectedRod.name === "Элитная удочка" ? "Карп" : "Окунь",
-        count: 1
-      };
-
-      // Обновление инвентаря в родительском компоненте
-      this.$emit('update-inventory', fish);
+      // Определяем три типа рыбы
+      const fishTypes = [
+        { name: 'Карп', image: '/assets/carp.jpg' },
+        { name: 'Окунь', image: '/assets/perch.jpg' },
+        { name: 'Щука', image: '/assets/pike.jpg' }
+      ];
+      const caughtFish = fishTypes[Math.floor(Math.random() * fishTypes.length)];
+      caughtFish.count = 1;
+      alert(`Поздравляем, вы поймали ${caughtFish.name}!`);
+      // Передаём объект рыбы родительскому компоненту для обновления инвентаря
+      this.$emit('update-inventory', caughtFish);
     }
   }
 };
@@ -177,7 +169,6 @@ export default {
   transition: transform 0.5s ease-in-out;
 }
 
-/* Анимация заброса */
 .rod.throwing {
   transform: translateX(-50%) rotate(-30deg);
 }
@@ -190,9 +181,8 @@ export default {
   transform: translateX(-50%) rotate(0deg);
 }
 
-/* Возврат удочки в вертикальное положение после подсекания */
 .rod.returned {
-  transform: translateX(-50%) rotate(0deg); /* Вернуть в вертикальное положение */
+  transform: translateX(-50%) rotate(0deg);
 }
 
 /* Стиль воды */
@@ -205,5 +195,28 @@ export default {
   margin-top: 20px;
   background-size: cover;
   background-position: center;
+}
+
+/* Наживка */
+.bait {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  font-size: 24px;
+  transition: all 0.8s ease-in-out;
+}
+
+.bait.flying {
+  transform: translateY(-50px);
+}
+
+.bait.biting {
+  animation: bite 0.5s ease-in-out infinite;
+}
+
+@keyframes bite {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+  100% { transform: translateY(0); }
 }
 </style>
