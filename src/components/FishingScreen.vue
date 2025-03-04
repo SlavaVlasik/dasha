@@ -12,8 +12,9 @@
     <h3>Наживки</h3>
     <select v-model="selectedBait">
       <option disabled value="">Выберите наживку</option>
-      <option v-for="bait in baits" :key="bait.id" :value="bait">{{ bait.name }}</option>
+      <option v-for="bait in localBaits" :key="bait.id" :value="bait">{{ bait.name }}</option>
     </select>
+
  
     <button @click="startFishing" :disabled="!selectedRod || !selectedBait || isFishing">
       Забросить удочку
@@ -49,6 +50,7 @@ export default {
   props: ["currentLocation", "rods", "baits", "inventory"],
   data() {
     return {
+      localBaits: this.baits.slice(),
       selectedRod: null,
       selectedBait: null,
       isFishing: false,
@@ -75,6 +77,18 @@ export default {
     }
   },
   methods: {
+    consumeBait() {
+    if (this.selectedBait) {
+      this.selectedBait.count--;
+      if (this.selectedBait.count <= 0) {
+        const index = this.localBaits.findIndex(b => b.id === this.selectedBait.id);
+        if (index !== -1) {
+          this.localBaits.splice(index, 1);
+        }
+        this.selectedBait = null;
+      }
+    }
+  },
     startFishing() {
       if (!this.selectedRod || !this.selectedBait) {
         alert("Выберите снасти!");
@@ -106,6 +120,8 @@ export default {
           } else {
             this.isBaitBiting = false;
             clearInterval(this.fishingTimer);
+            // При истечении времени наживка расходуется
+            this.consumeBait();
             alert("Рыба сорвалась!");
             this.isFishing = false;
           }
@@ -115,6 +131,8 @@ export default {
     hookFish() {
       if (!this.isBaitBiting) return;
       clearInterval(this.fishingTimer);
+      // При попытке подсечь рыбу наживка расходуется
+      this.consumeBait();
       this.isBaitBiting = false;
       const randomChance = Math.random();
       if (randomChance < this.totalCatchChance) {

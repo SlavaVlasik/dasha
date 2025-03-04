@@ -42,18 +42,42 @@
     </div>
 
     <!-- Модальное окно инвентаря -->
-    <div v-if="showInventory" class="inventory-modal">
-      <div class="modal-content">
-        <h3>Ваш инвентарь</h3>
-        <div class="inventory-items">
-          <div v-for="(fish, index) in inventory.getFishes()" :key="index" class="fish-item">
-            <img v-if="fish.image" :src="fish.image" alt="Fish Image" class="fish-image" />
+      <div v-if="showInventory" class="inventory-modal">
+    <div class="modal-content">
+      <h3>Ваш инвентарь</h3>
+      <div class="inventory-items">
+        <div class="inventory-section">
+          <h4>Пойманная рыба</h4>
+          <div
+            v-for="(fish, index) in inventory.getFishes()"
+            :key="'fish-'+index"
+            class="fish-item"
+          >
+            <img
+              v-if="fish.image"
+              :src="fish.image"
+              alt="Fish Image"
+              class="fish-image"
+            />
             <p>{{ fish.name }} x {{ fish.count }}</p>
           </div>
         </div>
-        <button @click="toggleInventory">Закрыть</button>
+
+        <div class="inventory-section">
+          <h4>Наживки</h4>
+          <div
+            v-for="(bait, index) in ownedBaits"
+            :key="'bait-'+index"
+            class="fish-item"
+          >
+            <p>{{ bait.name }} x {{ bait.count }}</p>
+          </div>
+        </div>
       </div>
+      <button @click="toggleInventory">Закрыть</button>
     </div>
+  </div>
+
   </div>
 </template>
 
@@ -274,4 +298,12 @@ select {
   margin-bottom: 5px;
   border-radius: 50%;
 }
+.inventory-section {
+  margin-bottom: 20px;
+}
+
+.inventory-section h4 {
+  margin-bottom: 10px;
+}
+
 </style>
