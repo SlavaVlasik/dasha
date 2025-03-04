@@ -2,6 +2,7 @@
   <div>
     <h1>Русская рыбалка</h1>
     <button @click="$emit('change-screen', 'locations')">Начать игру</button>
+    <button @click="$emit('change-screen', 'shop')">Магазин</button>
   </div>
 </template>
 
